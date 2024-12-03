@@ -1,10 +1,16 @@
 import { Keyboard } from "grammy";
 
-export const mainMenuKeyboard = () =>
-    new Keyboard()
+export const mainMenuKeyboard = (ctx) => {
+    const keys = new Keyboard()
         .text(`🛒 Do'kon`)
         .text('👤 Kabinet').row()
         .text('🌐 Buyurtmalar tarixi')
         .text(`💰 Xisob to'ldirish`).row()
         .text(`📕 Qo'llanma`)
-        .text('☎️ Yordam uchun');
+        .text('☎️ Yordam uchun')
+        .resized();
+
+    return ctx.reply("Kerakli bolimni tanlang", {
+        reply_markup: keys
+    });
+}
