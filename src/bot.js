@@ -12,12 +12,12 @@ const token = process.env.TOKEN
 
 export const bot = new Bot(token)
 
-bot.api.setMyCommands([
-    { command: 'start', description: 'Botni boshlash' },
-    { command: 'help', description: 'Yordam' },
-    { command: 'profile', description: "Profilni ko'rish" },
-    { command: 'pay', description: "To'lovni amalga oshirish" }
-]);
+// bot.api.setMyCommands([
+//     { command: 'start', description: 'Botni boshlash' },
+//     { command: 'help', description: 'Yordam' },
+//     { command: 'profile', description: "Profilni ko'rish" },
+//     { command: 'pay', description: "To'lovni amalga oshirish" }
+// ]);
 
 bot.use(session({
     initial(){
