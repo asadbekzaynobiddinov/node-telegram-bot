@@ -57,6 +57,7 @@ export const registerConv = async (conversation, ctx) => {
         await registeredUser.save()
         await ctx.reply(`Tabriklayman ${user.email}🥳\nQuyidagi tugmalardan foydalanishingiz mumkin`);
         await mainMenuKeyboard(ctx)
+        return
     } catch (error) {
         console.log(error)
     }
