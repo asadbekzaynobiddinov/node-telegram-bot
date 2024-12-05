@@ -1,4 +1,4 @@
-import { authKeyboards, mainMenuKeyboard } from "../keyboards/index.js"
+import { authKeyboards, mainMenuKeyboard, paymentKeys, shopKeys} from "../keyboards/index.js"
 import { User } from '../schema/index.js'
 
 export const startCommand = async (ctx) => {
@@ -9,27 +9,55 @@ export const startCommand = async (ctx) => {
             resize_keyboard: true
         })
     }
-
-    mainMenuKeyboard(ctx)
+    await mainMenuKeyboard(ctx)
 }
 
-export const helpCommand = (ctx) => {
-    ctx.reply("Yordam uchun Admin tez orada qo'shiladi")
-}
-
-export const paymentCommand = async (ctx) => {
-    await ctx.conversation.enter("paymentConv")
-}
-
-export const profileCommand = async (ctx) => {
+export const helpCommand = async (ctx) => {
     const user = await User.findOne({ id: ctx.from.id })
-    console.log(user)
     if (!user) {
         return ctx.reply("Kechirasiz siz hali ro'yxatdan o'tmagansiz !!!", {
             reply_markup: authKeyboards(),
             resize_keyboard: true
         })
     }
-    return ctx.reply(`👤 Email: ${user.email}\n💰 Hisob: ${user.balance} so'm`)
+    await ctx.reply("Yordam uchun Admin tez orada qo'shiladi")
 }
 
+export const paymentCommand = async (ctx) => {
+    const user = await User.findOne({ id: ctx.from.id })
+    if (!user) {
+        return ctx.reply("Kechirasiz siz hali ro'yxatdan o'tmagansiz !!!", {
+            reply_markup: authKeyboards(),
+            resize_keyboard: true
+        })
+    }
+    
+    await ctx.reply("👇🏻 Kerakli bo'limni tanlang:",{
+        reply_markup: paymentKeys(),
+    })
+}
+
+export const profileCommand = async (ctx) => {
+    const user = await User.findOne({ id: ctx.from.id })
+    if (!user) {
+        return ctx.reply("Kechirasiz siz hali ro'yxatdan o'tmagansiz !!!", {
+            reply_markup: authKeyboards(),
+            resize_keyboard: true
+        })
+    }
+    return ctx.reply("Sizning profilingiz ma'lumotlari\n" + `👤 Email: ${user.email}\n💰 Hisob: ${user.balance} so'm`)
+}
+
+export const shopCommand = async (ctx) => {
+    const user = await User.findOne({ id: ctx.from.id })
+    if (!user) {
+        return ctx.reply("Kechirasiz siz hali ro'yxatdan o'tmagansiz !!!", {
+            reply_markup: authKeyboards(),
+            resize_keyboard: true
+        })
+    }
+    return ctx.reply("👇🏻 Kerakli bo'limni tanlang:", {
+        reply_markup: shopKeys(),
+        resize_keyboard: true
+    })
+}
