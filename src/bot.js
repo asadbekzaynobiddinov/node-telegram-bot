@@ -2,7 +2,7 @@ import { Bot, session } from "grammy";
 import { helpCommand, startCommand, profileCommand, paymentCommand, shopCommand } from "./commands/bot.commands.js";
 import { config } from "dotenv";
 import { callBackFunction } from "./commands/inline.commands.js";
-import { registerConv, paymentConv } from "./converstaions/auth.conversation.js";
+import { registerConv, paymentConv } from "./converstaions/conversation.js";
 import { conversations, createConversation } from "@grammyjs/conversations";
 
 
