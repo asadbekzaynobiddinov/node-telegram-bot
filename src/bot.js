@@ -4,7 +4,7 @@ import { config } from "dotenv";
 import { callBackFunction } from "./commands/inline.commands.js";
 import { registerConv, paymentConv } from "./converstaions/auth.conversation.js";
 import { conversations, createConversation } from "@grammyjs/conversations";
-import { profileKey } from "./commands/key.commands.js";
+
 
 config()
 
@@ -20,10 +20,14 @@ export const bot = new Bot(token)
 //     {command: "shop", description: "Do'kon"}
 // ]);
 
-bot.use(session({
-    conversation : {}, 
-    type : 'multi'
-}));
+
+bot.use(
+    session({
+        initial: () => ({ 
+            conversation: {}
+        }),
+    })
+);
 
 bot.use(conversations());
 bot.use(createConversation(registerConv))
@@ -32,6 +36,7 @@ bot.use(createConversation(paymentConv))
 
 
 bot.command("start", async (ctx) => {
+    ctx.session.payStatus = false
     await startCommand(ctx)
 })
 
@@ -56,7 +61,7 @@ bot.on('callback_query:data', async (ctx) => {
 })
 
 bot.hears('👤 Kabinet', async (ctx) => {
-    await profileKey(ctx)
+    await profileCommand(ctx)
 })
 
 bot.hears("💰 Xisob to'ldirish", async (ctx) => {

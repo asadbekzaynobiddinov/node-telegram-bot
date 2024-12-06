@@ -1,6 +1,18 @@
 import bcrypt from "bcrypt";
-import { User } from "../schema/index.js";
-import { authKeyboards, mainMenuKeyboard, paymentKeys} from "../keyboards/index.js";
+import { config } from "dotenv";
+import { User, Payment } from "../schema/index.js";
+import { authKeyboards, mainMenuKeyboard, paymentKeys } from "../keyboards/index.js";
+import {
+    profileCommand,
+    startCommand,
+    helpCommand,
+    paymentCommand,
+    shopCommand
+} from "../commands/bot.commands.js";
+
+
+config()
+
 
 export const registerConv = async (conversation, ctx) => {
     try {
@@ -64,48 +76,103 @@ export const registerConv = async (conversation, ctx) => {
 };
 
 
+
+
 export const paymentConv = async (conversation, ctx) => {
     try {
+        const user = await User.findOne({id: ctx.from.id})
+
         await ctx.reply(
-            "tepadagi kartaga to'lov qilganingizdan so'ng.\n\n"+
-            "— jo'natgan pulingizni YOZMA ko'rinishda yuboring. "+
-            "Nuqta(.) vergul(,) ishlatmasdan jo'nating, "+
+            "tepadagi kartaga to'lov qilganingizdan so'ng.\n\n" +
+            "— jo'natgan pulingizni YOZMA ko'rinishda yuboring. " +
+            "Nuqta(.) vergul(,) ishlatmasdan jo'nating, " +
             "na'muna: 10000"
         );
 
-        const { message } = await conversation.wait();
-        const sum = message.text
+        let sum
+        let fileId
 
-        if (isNaN(sum) || sum <= 0) {
-            await ctx.reply("Iltimos, to'g'ri summa kiriting (faqat raqam).");
-            await ctx.reply("☟Kerakli bo'limni tanlang:", {
-                reply_markup: paymentKeys()
-            })
-            return;
+        do {
+            const { message } = await conversation.wait();
+            sum = message.text
+
+
+            switch (sum) {
+                case '/start':
+                    await startCommand(ctx)
+                    return;
+                case '/help':
+                case "☎️ Yordam uchun":
+                    await helpCommand(ctx)
+                    return;
+                case '/profile':
+                case "👤 Kabinet":
+                    await profileCommand(ctx)
+                    return;
+                case '/pay':
+                case "💰 Xisob to'ldirish":
+                    await paymentCommand(ctx)
+                    return;
+                case '/shop':
+                case "🛒 Do'kon":
+                    await shopCommand(ctx)
+                    return
+            }
+
+
+            if (isNaN(sum) || sum <= 0 || sum.includes('.') || sum.includes(',')) {
+                await ctx.reply("Iltimos, to'g'ri summa kiriting (faqat raqam, (.) va (,) siz).");
+            } else {
+                break
+            }
+        } while (true);
+
+        await ctx.reply("Endi esa to'lov skrenshotini jo'nating \npdf yoki boshqa format qabul qilinmaydi ");
+
+        do {
+            const { message } = await conversation.wait();
+
+            if (message.photo && message.photo.length > 0) {
+                const photo = message.photo;
+                const largestPhoto = photo[photo.length - 1];
+                fileId = largestPhoto.file_id;
+                break;
+            } else {
+                await ctx.reply("Iltimos, rasm yuboring.");
+            }
+        } while (true);
+
+        const pay = {
+            user_id: user.id,
+            amount: sum
         }
 
-        await ctx.reply("Endi esa to'lov skrenshotini jo'nating pdf yoki boshqa format qabul qilinmaydi ");
-        const pictureMessage = await conversation.wait();
+        const newPay = new Payment(pay)
+        await newPay.save()
+        const messageInfo = `email:  ${user.email}\n\nusername:  ${ctx.from.username}\n\nnumber:  ${user.phone_number}\n\nqiymat:  ${sum}` 
+        await ctx.api.sendPhoto(process.env.ADMIN_ID, fileId, {
+            parse_mode: "HTML",
+            caption: messageInfo,
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        {
+                            text: "✅ Tasdiqlash",
+                            callback_data: `ok=${newPay._id}`,
+                        },
+                        {
+                            text: "❌ Bekor qilish",
+                            callback_data: `no=${newPay._id}`,
+                        },
+                    ],
+                ],
+            },
+        });
 
-        const photo = pictureMessage.message.photo
-        if (pictureMessage.message.photo) {
-
-            const largestPhoto = photo[photo.length - 1];
-            const fileId = largestPhoto.file_id;
-
-            await ctx.api.sendPhoto(6648345777, fileId)
-
-            await ctx.reply("Siz yuborgan rasm:", {
-                reply_to_message_id: pictureMessage.message.message_id,
-                photo: fileId
-            });
-        } else {
-            await ctx.reply("Iltimos, rasm yuboring.");
-            await ctx.reply("☟Kerakli bo'limni tanlang:", {
-                reply_markup: paymentKeys()
-            })
-            return;
-        }
+        
+        await ctx.reply("Hisob to'ldirish haqida so'rovingiz qabul qilindi. \nTo'lov tekshirilib balansingizga tez orada pul tushadi!")
+        await mainMenuKeyboard(ctx)     
+        return
     } catch (error) {
         console.log("Suhbatda xato:", error);
         if (ctx) {
