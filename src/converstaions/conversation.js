@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { config } from "dotenv";
-import { User, Payment } from "../schema/index.js";
+import { User, Payment, Order } from "../schema/index.js";
 import { authKeyboards, mainMenuKeyboard, paymentKeys } from "../keyboards/index.js";
 import {
     profileCommand,
@@ -11,7 +11,9 @@ import {
 } from "../commands/bot.commands.js";
 
 
+
 config()
+
 
 
 export const registerConv = async (conversation, ctx) => {
@@ -74,9 +76,6 @@ export const registerConv = async (conversation, ctx) => {
         console.log(error)
     }
 };
-
-
-
 
 export const paymentConv = async (conversation, ctx) => {
     try {
@@ -181,4 +180,47 @@ export const paymentConv = async (conversation, ctx) => {
     }
 };
 
+export const orderConv = async (conversation, ctx) => {
+    try {
+        const orderType = ctx.update.callback_query.data.split('=')[1]
+        const orderAmount = ctx.update.callback_query.data.split('=')[2]
+
+        await ctx.reply('Akkaunt id raqamini kiritin: ')
+        const {message} = await conversation.wait()
+        const id = message.text
+
+        const newOrder = new Order({
+            user_id: ctx.from.id,
+            type: orderType,
+            price: +orderAmount,
+            account_id: id
+        })
+
+        await newOrder.save()
+
+        const outputmessage = 
+                `🎮: ${orderType.toUpperCase()}\n` + 
+                `🆔: ${id}\n` + 
+                `💵: ${orderAmount} so'm`
+
+        await ctx.reply(outputmessage, {
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        {
+                            text: "✅ Tasdiqlash",
+                            callback_data: `confirm=${newOrder._id}`,
+                        },
+                        {
+                            text: "❌ Bekor qilish",
+                            callback_data: `cancel=${newOrder._id}`,
+                        },
+                    ],
+                ],
+            },
+        })
+    } catch (error) {
+        console.log(error.message)
+    }
+}
 
