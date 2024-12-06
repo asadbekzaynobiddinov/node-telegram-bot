@@ -10,7 +10,8 @@ export const mainMenuKeyboard = (ctx) => {
         .text('☎️ Yordam uchun')
         .resized();
 
-    return ctx.reply("Kerakli bolimni tanlang", {
-        reply_markup: keys
+    return ctx.reply("👇🏻 Kerakli bolimni tanlang", {
+        reply_markup: keys,
+        one_time_keyboard: true
     });
 }

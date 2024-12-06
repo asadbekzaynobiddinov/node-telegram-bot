@@ -1,10 +1,10 @@
 import { Bot, session } from "grammy";
-import { helpCommand, startCommand, profileCommand, paymentCommand } from "./commands/bot.commands.js";
+import { helpCommand, startCommand, profileCommand, paymentCommand, shopCommand } from "./commands/bot.commands.js";
 import { config } from "dotenv";
 import { callBackFunction } from "./commands/inline.commands.js";
 import { registerConv, paymentConv } from "./converstaions/auth.conversation.js";
 import { conversations, createConversation } from "@grammyjs/conversations";
-import { profileKey } from "./commands/key.commands.js";
+
 
 config()
 
@@ -16,14 +16,18 @@ export const bot = new Bot(token)
 //     { command: 'start', description: 'Botni boshlash' },
 //     { command: 'help', description: 'Yordam' },
 //     { command: 'profile', description: "Profilni ko'rish" },
-//     { command: 'pay', description: "To'lovni amalga oshirish" }
+//     { command: 'pay', description: "To'lovni amalga oshirish" },
+//     {command: "shop", description: "Do'kon"}
 // ]);
 
-bot.use(session({
-    initial(){
-        return {}
-    },
-}));
+
+bot.use(
+    session({
+        initial: () => ({ 
+            conversation: {}
+        }),
+    })
+);
 
 bot.use(conversations());
 bot.use(createConversation(registerConv))
@@ -31,29 +35,41 @@ bot.use(createConversation(paymentConv))
 
 
 
-bot.command("start", (ctx) => {
-
-    startCommand(ctx)
+bot.command("start", async (ctx) => {
+    ctx.session.payStatus = false
+    await startCommand(ctx)
 })
 
-bot.command('help', (ctx) => {
-    helpCommand(ctx)
+bot.command('help', async (ctx) => {
+    await helpCommand(ctx)
 })
 
-bot.command('profile', (ctx) => {
-    profileCommand(ctx)
+bot.command('profile', async (ctx) => {
+    await profileCommand(ctx)
 })
 
-bot.command('pay', (ctx) => {
-    paymentCommand(ctx)
+bot.command('pay', async (ctx) => {
+    await paymentCommand(ctx)
+})
+
+bot.command("shop", async (ctx) => {
+    await shopCommand(ctx)
 })
 
 bot.on('callback_query:data', async (ctx) => {
     await callBackFunction(ctx)
 })
 
-bot.hears('👤 Kabinet', (ctx) => {
-    profileKey(ctx)
+bot.hears('👤 Kabinet', async (ctx) => {
+    await profileCommand(ctx)
+})
+
+bot.hears("💰 Xisob to'ldirish", async (ctx) => {
+    await paymentCommand(ctx)
+})
+
+bot.hears("🛒 Do'kon", async (ctx) => {
+    await shopCommand(ctx)
 })
 
 bot.start()
