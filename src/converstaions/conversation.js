@@ -184,6 +184,7 @@ export const orderConv = async (conversation, ctx) => {
     try {
         const orderType = ctx.update.callback_query.data.split('=')[1]
         const orderAmount = ctx.update.callback_query.data.split('=')[2]
+        const orderValue = ctx.update.callback_query.data.split('=')[3]
 
         await ctx.reply('Akkaunt id raqamini kiritin: ')
         const {message} = await conversation.wait()
@@ -192,6 +193,7 @@ export const orderConv = async (conversation, ctx) => {
         const newOrder = new Order({
             user_id: ctx.from.id,
             type: orderType,
+            value: orderValue,
             price: +orderAmount,
             account_id: id
         })
@@ -201,6 +203,7 @@ export const orderConv = async (conversation, ctx) => {
         const outputmessage = 
                 `🎮: ${orderType.toUpperCase()}\n` + 
                 `🆔: ${id}\n` + 
+                `${orderValue}\n` +
                 `💵: ${orderAmount} so'm`
 
         await ctx.reply(outputmessage, {
