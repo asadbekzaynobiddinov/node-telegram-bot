@@ -122,7 +122,7 @@ export const callBackFunction = async (ctx) => {
                     `🆔: ${orderPaid.account_id}\n` +
                     `${orderPaid.value}\n` +
                     `💵: ${orderPaid.price} so'm\n` +
-                    `✅: Hisob t'ldirildi`
+                    `✅: Hisob to'ldirildi`
                 await ctx.api.sendMessage(orderPaid.user_id, messagePaid)
                 await ctx.editMessageReplyMarkup()
                 break;
