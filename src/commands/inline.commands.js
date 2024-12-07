@@ -138,7 +138,7 @@ export const callBackFunction = async (ctx) => {
                 const messageDidNotPay =
                     `🎮: ${orderDidNotPay.type.toUpperCase()}\n` +
                     `🆔: ${orderDidNotPay.account_id}\n` +
-                    `${orderConfirm.value}\n` +
+                    `${orderDidNotPay.value}\n` +
                     `💵: ${orderDidNotPay.price} so'm\n` +
                     `❌: Buyurtma bekor qilindi`
                 await ctx.api.sendMessage(orderDidNotPay.user_id, messageDidNotPay)
