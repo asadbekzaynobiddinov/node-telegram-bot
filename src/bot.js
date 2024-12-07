@@ -1,5 +1,12 @@
 import { Bot, session } from "grammy";
-import { helpCommand, startCommand, profileCommand, paymentCommand, shopCommand } from "./commands/bot.commands.js";
+import { 
+    helpCommand, 
+    startCommand, 
+    profileCommand, 
+    paymentCommand, 
+    shopCommand,
+    historyCommand 
+} from "./commands/bot.commands.js";
 import { config } from "dotenv";
 import { callBackFunction } from "./commands/inline.commands.js";
 import { registerConv, paymentConv, orderConv } from "./converstaions/conversation.js";
@@ -24,6 +31,8 @@ export const bot = new Bot(token)
 bot.use(
     session({
         initial: () => ({ 
+            page: 0,
+            limit: 0,
             conversation: {}
         }),
     })
@@ -71,6 +80,18 @@ bot.hears("💰 Xisob to'ldirish", async (ctx) => {
 
 bot.hears("🛒 Do'kon", async (ctx) => {
     await shopCommand(ctx)
+})
+
+bot.hears("🌐 Buyurtmalar tarixi", async (ctx) => {
+    await historyCommand(ctx)
+})
+
+bot.hears("☎️ Yordam uchun", async (ctx) => {
+    await helpCommand(ctx)
+})
+
+bot.hears("📕 Qo'llanma", async (ctx) => {
+    await ctx.reply("Tez orada bot uchun qo'llanma yoziladi")
 })
 
 bot.start()
