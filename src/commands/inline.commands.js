@@ -59,6 +59,7 @@ export const callBackFunction = async (ctx) => {
             case 'no':
                 const paymentNo = await Payment.findById(id)
                 await ctx.api.sendMessage(paymentNo.user_id, "Hisob to'ldirish haqidagi arizangiz bekor qilindi 😔\nQaytadan urinib ko'ring")
+                await ctx.editMessageReplyMarkup()
                 break;
 
             case 'confirm':
