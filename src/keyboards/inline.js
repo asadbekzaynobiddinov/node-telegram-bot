@@ -1,5 +1,7 @@
 import { InlineKeyboard } from "grammy";
 
+
+
 export const authKeyboards = () =>
     new InlineKeyboard()
         .text("Ro'yxatdan o'tish", "register")
@@ -41,17 +43,17 @@ export const ucKeys = () =>
 
 export const almazKeys = () =>
     new InlineKeyboard()
-        .text("💎 ALMAZ propusk - 200000So'm", "almaz_propusk").row()
-        .text("💎 8 ALMAZ ML - 30000So'm", "8_almaz").row()
-        .text("💎 35 ALMAZ ML - 70000So'm", "35_almaz").row()
-        .text("💎 88 ALMAZ ML - 170000So'm", "88_almaz").row()
-        .text("💎 132 ALMAZ ML - 250000So'm", "132_almaz").row()
-        .text("💎 264 ALMAZ ML - 450000So'm", "264_almaz").row()
-        .text("💎 440 ALMAZ ML - 730000So'm", "440_almaz").row()
-        .text("💎 734 ALMAZ ML - 1130000So'm", "734_almaz").row()
-        .text("💎 933 ALMAZ ML - 1450000So'm", "933_almaz").row()
-        .text("💎 1410 ALMAZ ML - 2150000So'm", "1410_almaz").row()
-        .text("💎 1881 ALMAZ ML - 2810000So'm", "1881_almaz").row()
-        .text("💎 2845 ALMAZ ML - 4300000So'm", "2845_almaz").row()
-        .text("💎 6163 ALMAZ ML - 9000000So'm", "6163_almaz").row()
+        .text("💎 ALMAZ propusk - 20000So'm", "almaz=mobile legends=20000").row()
+        .text("💎 8 ALMAZ ML - 3000So'm", "almaz=mobile legends=3000").row()
+        .text("💎 35 ALMAZ ML - 7000So'm", "almaz=mobile legends=7000").row()
+        .text("💎 88 ALMAZ ML - 17000So'm", "almaz=mobile legends=17000").row()
+        .text("💎 132 ALMAZ ML - 25000So'm", "almaz=mobile legends=25000").row()
+        .text("💎 264 ALMAZ ML - 45000So'm", "almaz=mobile legends=45000").row()
+        .text("💎 440 ALMAZ ML - 73000So'm", "almaz=mobile legends=73000").row()
+        .text("💎 734 ALMAZ ML - 113000So'm", "almaz=mobile legends=113000").row()
+        .text("💎 933 ALMAZ ML - 145000So'm", "almaz=mobile legends=145000").row()
+        .text("💎 1410 ALMAZ ML - 215000So'm", "almaz=mobile legends=215000").row()
+        .text("💎 1881 ALMAZ ML - 281000So'm", "almaz=mobile legends=281000").row()
+        .text("💎 2845 ALMAZ ML - 430000So'm", "almaz=mobile legends=430000").row()
+        .text("💎 6163 ALMAZ ML - 900000So'm", "almaz=mobile legends=900000").row()
         .text("↩️ Orqaga", "back");

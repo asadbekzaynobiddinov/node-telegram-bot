@@ -11,6 +11,7 @@ export const callBackFunction = async (ctx) => {
         const [status, id, amount] = callBackData.split('=')
 
         switch (status) {
+
             case 'register':
                 await ctx.conversation.enter('registerConv')
                 await ctx.editMessageReplyMarkup() 
@@ -95,6 +96,7 @@ export const callBackFunction = async (ctx) => {
                 await ctx.editMessageReplyMarkup()
                 break;
 
+            case "almaz":
             case "uc":
                 const userUc = await User.findOne({ id: ctx.from.id })
                 if (userUc.balance < amount) {
