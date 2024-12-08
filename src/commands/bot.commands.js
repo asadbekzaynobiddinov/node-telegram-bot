@@ -69,13 +69,10 @@ export const shopCommand = async (ctx) => {
 }
 
 export const historyCommand = async (ctx) => {
-
-    ctx.session.page = 1
-    ctx.session.limit = 10
+    ctx.session.page = ctx.session.page || 1;
+    ctx.session.limit = ctx.session.limit || 10;
 
     const user = await User.findOne({ id: ctx.from.id });
-    const orders = await Order.find({ user_id: ctx.from.id }).sort({ createdAt: -1 }).skip(0).limit(10);
-
     if (!user) {
         return ctx.reply("Kechirasiz, siz hali ro'yxatdan o'tmagansiz!", {
             reply_markup: authKeyboards(),
@@ -83,27 +80,47 @@ export const historyCommand = async (ctx) => {
         });
     }
 
+    const orders = await Order.aggregate([
+        {
+            $group: {
+                _id: { date: { $dateToString: { format: "%d.%m.%Y", date: "$createdAt" } } },
+                realDate: { $first: "$createdAt" },
+                totalOrders: { $sum: 1 },
+                totalAmount: { $sum: "$price" }
+            }
+        },
+        {
+            $sort: { realDate: -1 }
+        },
+        {
+            $skip: (ctx.session.page - 1) * ctx.session.limit
+        },
+        {
+            $limit: ctx.session.limit
+        },
+        {
+            $project: {
+                _id: 0,
+                date: "$_id.date",
+                realDate: 1,
+                totalOrders: 1,
+                totalAmount: 1
+            }
+        }
+    ]);
+
     if (!orders || orders.length === 0) {
         return ctx.reply("Sizda hech qanday harid amalga oshirilmagan.");
     }
+
 
     const inlineKeyboard = [];
     let row = [];
 
     for (let order of orders) {
-        const orderDate = new Date(order.createdAt)
-            .toLocaleDateString("uz-UZ", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-            })
-            .split("/")
-            .join(".");
-
-
         row.push({
-            text: `${orderDate}`,
-            callback_data: `order=${order._id}`
+            text: `${order.date}`,
+            callback_data: `order=${JSON.stringify(order.realDate)}=${ctx.from.id }`
         });
 
         if (row.length === 2) {
@@ -112,10 +129,11 @@ export const historyCommand = async (ctx) => {
         }
     }
 
+    
     if (row.length > 0) {
         inlineKeyboard.push(row);
     }
-
+    
     const prewNext = [
         {
             text: "⬅️ Prev", callback_data: 'history=prev'
@@ -123,11 +141,13 @@ export const historyCommand = async (ctx) => {
         {
             text: "Next ➡️", callback_data: "history=next"
         }
-    ]
-    inlineKeyboard.push(prewNext)
+    ];
+
+    inlineKeyboard.push(prewNext);
     inlineKeyboard.push([{
         text: "❌ Cancel", callback_data: "remove"
-    }])
+    }]);
+
     await ctx.reply("Sizning haridlar tarixi:", {
         reply_markup: {
             inline_keyboard: inlineKeyboard,

@@ -8,8 +8,9 @@ config()
 export const callBackFunction = async (ctx) => {
     try {
         const callBackData = ctx.callbackQuery.data
-        const [status, id, amount, value] = callBackData.split('=')
-        
+        const [status, id, amount] = callBackData.split('=')
+
+
         switch (status) {
 
             case 'register':
@@ -180,7 +181,7 @@ export const callBackFunction = async (ctx) => {
                     .skip(skip)
                     .limit(ctx.session.limit)
 
-                if(orders.length == 0){
+                if (orders.length == 0) {
                     ctx.session.page--
                     return ctx.answerCallbackQuery({
                         text: "Siz ro'yxatning oxiridasiz",
@@ -241,14 +242,30 @@ export const callBackFunction = async (ctx) => {
             case "order":
                 await ctx.api.deleteMessage(ctx.from.id, ctx.update.callback_query.message.message_id)
 
-                const order = await Order.findById({_id: id})
-                const message = 
-                    `🎮: ${order.type.toUpperCase()}\n` +
-                    `🆔: ${order.account_id}\n` +
-                    `${order.value}\n` +
-                    `💵: ${order.price} so'm\n` +
-                    `✅: To'ldirildi`
-                await ctx.api.sendMessage(order.user_id, message)
+                const userId = amount
+                const parsedDate = new Date(JSON.parse(id))
+
+                const startOfDay = new Date(parsedDate);
+                startOfDay.setUTCHours(0, 0, 0, 0);
+
+                const endOfDay = new Date(parsedDate);
+                endOfDay.setUTCHours(23, 59, 59, 999);
+
+                const totalOrders = await Order.find({
+                    user_id: userId,
+                    createdAt: { $gte: startOfDay, $lte: endOfDay }
+                }).sort({ createdAt: -1 });
+
+
+                for (let order of totalOrders) {
+                    const message =
+                        `🎮: ${order.type.toUpperCase()}\n` +
+                        `🆔: ${order.account_id}\n` +
+                        `${order.value}\n` +
+                        `💵: ${order.price} so'm\n` +
+                        `✅: To'ldirildi`
+                    await ctx.api.sendMessage(order.user_id, message)
+                }
                 break;
 
             case "remove":
