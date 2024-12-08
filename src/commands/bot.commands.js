@@ -82,6 +82,11 @@ export const historyCommand = async (ctx) => {
 
     const orders = await Order.aggregate([
         {
+            $match: {
+                user_id: ctx.from.id
+            }
+        },
+        {
             $group: {
                 _id: { date: { $dateToString: { format: "%d.%m.%Y", date: "$createdAt" } } },
                 realDate: { $first: "$createdAt" },
