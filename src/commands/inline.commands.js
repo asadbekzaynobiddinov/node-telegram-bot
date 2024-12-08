@@ -175,7 +175,8 @@ export const callBackFunction = async (ctx) => {
                         show_alert: true
                     })
                 }
-
+                
+                
                 const orders = await Order.aggregate([
                     {
                         $group: {
@@ -189,7 +190,7 @@ export const callBackFunction = async (ctx) => {
                         $sort: { realDate: -1 }
                     },
                     {
-                        $skip: (ctx.session.page - 1) * ctx.session.limit
+                        $skip: skip
                     },
                     {
                         $limit: ctx.session.limit
@@ -204,12 +205,16 @@ export const callBackFunction = async (ctx) => {
                         }
                     }
                 ]);
-            
-                if (!orders || orders.length === 0) {
-                    return ctx.reply("Sizda hech qanday harid amalga oshirilmagan.");
+                
+                if (orders.length == 0) {
+                    ctx.session.page--
+                    return ctx.answerCallbackQuery({
+                        text: "Siz ro'yxatning oxiridasiz",
+                        show_alert: true
+                    })
                 }
-            
-            
+                await ctx.api.deleteMessage(ctx.from.id, ctx.update.callback_query.message.message_id)
+                
                 const inlineKeyboard = [];
                 let row = [];
             
@@ -224,7 +229,6 @@ export const callBackFunction = async (ctx) => {
                         row = [];
                     }
                 }
-            
 
                 if (row.length > 0) {
                     inlineKeyboard.push(row);
