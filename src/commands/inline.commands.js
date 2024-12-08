@@ -176,44 +176,55 @@ export const callBackFunction = async (ctx) => {
                     })
                 }
 
-                const orders = await Order.find({ user_id: ctx.from.id })
-                    .sort({ createdAt: -1 })
-                    .skip(skip)
-                    .limit(ctx.session.limit)
-
-                if (orders.length == 0) {
-                    ctx.session.page--
-                    return ctx.answerCallbackQuery({
-                        text: "Siz ro'yxatning oxiridasiz",
-                        show_alert: true
-                    })
+                const orders = await Order.aggregate([
+                    {
+                        $group: {
+                            _id: { date: { $dateToString: { format: "%d.%m.%Y", date: "$createdAt" } } },
+                            realDate: { $first: "$createdAt" },
+                            totalOrders: { $sum: 1 },
+                            totalAmount: { $sum: "$price" }
+                        }
+                    },
+                    {
+                        $sort: { realDate: -1 }
+                    },
+                    {
+                        $skip: (ctx.session.page - 1) * ctx.session.limit
+                    },
+                    {
+                        $limit: ctx.session.limit
+                    },
+                    {
+                        $project: {
+                            _id: 0,
+                            date: "$_id.date",
+                            realDate: 1,
+                            totalOrders: 1,
+                            totalAmount: 1
+                        }
+                    }
+                ]);
+            
+                if (!orders || orders.length === 0) {
+                    return ctx.reply("Sizda hech qanday harid amalga oshirilmagan.");
                 }
-
-                await ctx.api.deleteMessage(ctx.from.id, ctx.update.callback_query.message.message_id)
+            
+            
                 const inlineKeyboard = [];
                 let row = [];
-
+            
                 for (let order of orders) {
-                    const orderDate = new Date(order.createdAt)
-                        .toLocaleDateString("uz-UZ", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                        })
-                        .split("/")
-                        .join(".");
-
-
                     row.push({
-                        text: `${orderDate}`,
-                        callback_data: `order=${order._id}`
+                        text: `${order.date}`,
+                        callback_data: `order=${JSON.stringify(order.realDate)}=${ctx.from.id }`
                     });
-
+            
                     if (row.length === 2) {
                         inlineKeyboard.push(row);
                         row = [];
                     }
                 }
+            
 
                 if (row.length > 0) {
                     inlineKeyboard.push(row);
